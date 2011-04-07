@@ -23,12 +23,10 @@ public class Dropbox {
 
     DropboxAPI api;
     Config config;
-    private String username;
-    private String password;
+    String username = "harinis@thoughtworks.com";
+    String password = "koshaproj";
 
-    public Dropbox(String username, String password) {
-	this.username = username;
-	this.password = password;
+    public Dropbox() {
 	this.api = new DropboxAPI();
 	buildConfig();
     }
@@ -40,6 +38,7 @@ public class Dropbox {
 	for (File file : session.getArtifacts()) {
 	    api.putFile(ROOT, path, file);
 	}
+	session.deleteFiles();
     }
 
     private void connect() {

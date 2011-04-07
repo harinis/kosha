@@ -1,7 +1,6 @@
 package com.thoughtworks.kosha;
 
 import java.io.IOException;
-import java.util.Date;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -9,13 +8,17 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowData;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.part.ViewPart;
 
 import com.skype.SkypeException;
+import com.thoughtworks.kosha.data.Session;
 import com.thoughtworks.kosha.dropbox.Dropbox;
 import com.thoughtworks.kosha.skype.SkypeDelegate;
 
@@ -28,12 +31,11 @@ import com.thoughtworks.kosha.skype.SkypeDelegate;
  */
 public class View extends ViewPart {
     public static final String ID = "Kosha.view";
-    private Button button2;
     private Composite composite1;
     private Button button1;
     private Group group1;
-    private Composite tagsComposite;
-    private Text text1;
+    private Label statusLbl;
+    private Text tags;
     private SkypeDelegate skypeDelegate;
 
     @Override
@@ -45,32 +47,17 @@ public class View extends ViewPart {
 	    parent.setSize(557, 321);
 	    {
 		composite1 = new Composite(parent, SWT.NONE);
-		GridLayout composite1Layout = new GridLayout();
-		composite1Layout.makeColumnsEqualWidth = true;
+		RowLayout composite1Layout = new RowLayout(org.eclipse.swt.SWT.HORIZONTAL);
 		GridData composite1LData = new GridData();
 		composite1LData.grabExcessHorizontalSpace = true;
 		composite1LData.horizontalAlignment = GridData.FILL;
 		composite1LData.verticalAlignment = GridData.FILL;
-		composite1LData.grabExcessVerticalSpace = true;
 		composite1.setLayoutData(composite1LData);
 		composite1.setLayout(composite1Layout);
 		{
-		    button2 = new Button(composite1, SWT.PUSH | SWT.CENTER);
-		    GridData button2LData = new GridData();
-		    button2LData.horizontalAlignment = GridData.CENTER;
-		    button2LData.grabExcessVerticalSpace = true;
-		    button2LData.grabExcessHorizontalSpace = true;
-		    button2.setLayoutData(button2LData);
-		    button2.setText("Record");
-		    button2.addSelectionListener(new SelectionListener() {
-			public void widgetSelected(SelectionEvent e) {
-
-			}
-
-			public void widgetDefaultSelected(SelectionEvent e) {
-
-			}
-		    });
+			statusLbl = new Label(composite1, SWT.NONE);
+			RowData statusLblLData = new RowData();
+			statusLbl.setLayoutData(statusLblLData);
 		}
 	    }
 	    {
@@ -84,42 +71,32 @@ public class View extends ViewPart {
 		group1LData.grabExcessHorizontalSpace = true;
 		group1LData.grabExcessVerticalSpace = true;
 		group1.setLayoutData(group1LData);
-		group1.setText("Tags");
+		group1.setText("Notes");
 		{
-		    tagsComposite = new Composite(group1, SWT.NONE);
-		    GridLayout composite2Layout = new GridLayout();
-		    composite2Layout.makeColumnsEqualWidth = true;
-		    composite2Layout.numColumns = 2;
-		    GridData composite2LData = new GridData();
-		    composite2LData.grabExcessHorizontalSpace = true;
-		    composite2LData.horizontalAlignment = GridData.FILL;
-		    composite2LData.verticalAlignment = GridData.FILL;
-		    composite2LData.grabExcessVerticalSpace = true;
-		    tagsComposite.setLayoutData(composite2LData);
-		    tagsComposite.setLayout(composite2Layout);
-		}
-		{
-		    text1 = new Text(group1, SWT.SINGLE | SWT.WRAP | SWT.BORDER);
+		    tags = new Text(group1, SWT.MULTI | SWT.WRAP | SWT.BORDER);
 		    GridData text1LData = new GridData();
 		    text1LData.grabExcessHorizontalSpace = true;
 		    text1LData.horizontalAlignment = GridData.FILL;
-		    text1.setLayoutData(text1LData);
-		    text1.setText("text1");
+		    text1LData.verticalAlignment = GridData.FILL;
+		    text1LData.grabExcessVerticalSpace = true;
+		    tags.setLayoutData(text1LData);
 		}
 	    }
 	    {
-		button1 = new Button(parent, SWT.PUSH | SWT.CENTER);
-		GridData button1LData = new GridData();
-		button1LData.horizontalAlignment = GridData.FILL;
-		button1LData.grabExcessHorizontalSpace = true;
-		button1.setLayoutData(button1LData);
-		button1.setText("Archive");
-		button1.addSelectionListener(new SelectionAdapter() {
-		    public void widgetSelected(SelectionEvent e) {
-			skypeDelegate.getSession().setDate(new Date());
-			new Dropbox("harinis@thoughtworks.com", "koshaproj").recordHistory(skypeDelegate.getSession());
-		    }
-		});
+	    	button1 = new Button(parent, SWT.PUSH | SWT.CENTER);
+	    	GridData button1LData = new GridData();
+	    	button1LData.horizontalAlignment = GridData.FILL;
+	    	button1LData.grabExcessHorizontalSpace = true;
+	    	button1.setLayoutData(button1LData);
+	    	button1.setText("Archive");
+	    	button1.addSelectionListener(new SelectionAdapter() {
+	    		public void widgetSelected(SelectionEvent e) {
+	    			Session currSession = skypeDelegate.getConsolidatedSession();
+	    			currSession.setTagsFile(tags.getText().trim());
+	    			new Dropbox().recordHistory(currSession);
+	    			tags.setText("");
+	    		}
+	    	});
 	    }
 	}
 
@@ -141,5 +118,5 @@ public class View extends ViewPart {
 	// TODO Auto-generated method stub
 
     }
-
+    
 }

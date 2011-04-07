@@ -59,5 +59,17 @@
          </menu>
       </menuContribution>
    </extension>
+   <extension
+         id="kosha"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="Kosha1.application"
+            name="Kosha">
+         <property
+               name="appName"
+               value="Kosha">
+         </property>
+      </product>
+   </extension>
 
 </plugin>
