@@ -1,17 +1,14 @@
 package com.thoughtworks.kosha;
 
-import java.io.IOException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
@@ -20,6 +17,8 @@ import org.eclipse.ui.part.ViewPart;
 import com.skype.SkypeException;
 import com.thoughtworks.kosha.data.Session;
 import com.thoughtworks.kosha.dropbox.Dropbox;
+import com.thoughtworks.kosha.skype.CallDetails;
+import com.thoughtworks.kosha.skype.CallInfoListener;
 import com.thoughtworks.kosha.skype.SkypeDelegate;
 
 /**
@@ -29,14 +28,13 @@ import com.thoughtworks.kosha.skype.SkypeDelegate;
  * Jigloo implies acceptance of these licensing terms. A COMMERCIAL LICENSE HAS NOT BEEN PURCHASED FOR THIS MACHINE, SO
  * JIGLOO OR THIS CODE CANNOT BE USED LEGALLY FOR ANY CORPORATE OR COMMERCIAL PURPOSE.
  */
-public class View extends ViewPart {
+public class View extends ViewPart implements IKView {
     public static final String ID = "Kosha.view";
     private Composite composite1;
-    private Button button1;
+    private Button archiveBtn;
     private Group group1;
     private Label statusLbl;
-    private Text tags;
-    private SkypeDelegate skypeDelegate;
+    private Text notesTxt;
 
     @Override
     public void createPartControl(Composite parent) {
@@ -47,7 +45,8 @@ public class View extends ViewPart {
 	    parent.setSize(557, 321);
 	    {
 		composite1 = new Composite(parent, SWT.NONE);
-		RowLayout composite1Layout = new RowLayout(org.eclipse.swt.SWT.HORIZONTAL);
+		GridLayout composite1Layout = new GridLayout();
+		composite1Layout.makeColumnsEqualWidth = true;
 		GridData composite1LData = new GridData();
 		composite1LData.grabExcessHorizontalSpace = true;
 		composite1LData.horizontalAlignment = GridData.FILL;
@@ -55,9 +54,12 @@ public class View extends ViewPart {
 		composite1.setLayoutData(composite1LData);
 		composite1.setLayout(composite1Layout);
 		{
-			statusLbl = new Label(composite1, SWT.NONE);
-			RowData statusLblLData = new RowData();
-			statusLbl.setLayoutData(statusLblLData);
+		    statusLbl = new Label(composite1, SWT.NONE);
+		    GridData statusLblLData = new GridData();
+		    statusLblLData.grabExcessHorizontalSpace = true;
+		    statusLblLData.horizontalAlignment = GridData.FILL;
+		    statusLbl.setLayoutData(statusLblLData);
+		    statusLbl.setText("sdfsdfsdf");
 		}
 	    }
 	    {
@@ -73,50 +75,46 @@ public class View extends ViewPart {
 		group1.setLayoutData(group1LData);
 		group1.setText("Notes");
 		{
-		    tags = new Text(group1, SWT.MULTI | SWT.WRAP | SWT.BORDER);
+		    notesTxt = new Text(group1, SWT.MULTI | SWT.WRAP | SWT.BORDER);
 		    GridData text1LData = new GridData();
 		    text1LData.grabExcessHorizontalSpace = true;
 		    text1LData.horizontalAlignment = GridData.FILL;
 		    text1LData.verticalAlignment = GridData.FILL;
 		    text1LData.grabExcessVerticalSpace = true;
-		    tags.setLayoutData(text1LData);
+		    notesTxt.setLayoutData(text1LData);
 		}
 	    }
 	    {
-	    	button1 = new Button(parent, SWT.PUSH | SWT.CENTER);
-	    	GridData button1LData = new GridData();
-	    	button1LData.horizontalAlignment = GridData.FILL;
-	    	button1LData.grabExcessHorizontalSpace = true;
-	    	button1.setLayoutData(button1LData);
-	    	button1.setText("Archive");
-	    	button1.addSelectionListener(new SelectionAdapter() {
-	    		public void widgetSelected(SelectionEvent e) {
-	    			Session currSession = skypeDelegate.getConsolidatedSession();
-	    			currSession.setTagsFile(tags.getText().trim());
-	    			new Dropbox().recordHistory(currSession);
-	    			tags.setText("");
-	    		}
-	    	});
+		archiveBtn = new Button(parent, SWT.PUSH | SWT.CENTER);
+		GridData button1LData = new GridData();
+		button1LData.horizontalAlignment = GridData.FILL;
+		button1LData.grabExcessHorizontalSpace = true;
+		archiveBtn.setLayoutData(button1LData);
+		archiveBtn.setText("Archive");
 	    }
 	}
 
-	initSkype();
-    }
-
-    private void initSkype() {
-	try {
-	    skypeDelegate = new SkypeDelegate();
-	} catch (SkypeException e1) {
-	    e1.printStackTrace();
-	} catch (IOException e) {
-	    e.printStackTrace();
-	}
+	new KController(this);
     }
 
     @Override
     public void setFocus() {
-	// TODO Auto-generated method stub
-
     }
-    
+
+    public void setCallStatus(String status) {
+	statusLbl.setText(status);
+    }
+
+    public void addArchiveListener(SelectionListener listener) {
+	archiveBtn.addSelectionListener(listener);
+    }
+
+    public String getNotes() {
+	return notesTxt.getText();
+    }
+
+    public void clearNotes() {
+	notesTxt.setText("");
+    }
+
 }
